@@ -93,7 +93,11 @@ if wants_ssl:
     ssl_context = ssl.create_default_context()
     engine_options["connect_args"] = {"ssl_context": ssl_context}
 
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = engine_options
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_pre_ping": True,
+    "pool_size": 3,
+    "max_overflow": 2,
+}
 
 db = SQLAlchemy(app)
 
