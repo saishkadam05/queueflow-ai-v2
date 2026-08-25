@@ -1,3 +1,5 @@
+import eventlet
+eventlet.monkey_patch()
 from reportlab.platypus import (
     SimpleDocTemplate,
     Paragraph,
@@ -106,7 +108,7 @@ db = SQLAlchemy(app)
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
-    async_mode="threading"
+    async_mode="eventlet"
 )
 
 connected_users = {}
