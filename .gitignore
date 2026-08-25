@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+static/qr/*.png
+static/qr/*.pdf
+venv/
+.DS_Store

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Admin Dashboard</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-5">
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<h2 class="mb-4">👨‍💼 QueueFlow AI Admin Panel</h2>
+
+<form method="GET" class="mb-4">
+
+    <div class="input-group mb-3">
+
+        <input
+            type="text"
+            name="search"
+            class="form-control"
+            placeholder="Search Token, User or Department..."
+            value="{{ request.args.get('search', '') }}">
+
+        <button class="btn btn-primary">
+            Search
+        </button>
+
+    </div>
+
+    <div class="btn-group">
+
+        <button
+            type="submit"
+            name="status"
+            value=""
+            class="btn btn-outline-dark">
+            All
+        </button>
+
+        <button
+            type="submit"
+            name="status"
+            value="Waiting"
+            class="btn btn-outline-warning">
+            Waiting
+        </button>
+
+        <button
+            type="submit"
+            name="status"
+            value="Serving"
+            class="btn btn-outline-success">
+            Serving
+        </button>
+
+        <button
+            type="submit"
+            name="status"
+            value="Completed"
+            class="btn btn-outline-secondary">
+            Completed
+        </button>
+
+    </div>
+
+</form>
+
+<div class="row mb-4">
+
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h5>👥 Users</h5>
+            <h2>{{ total_users }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h5>🎫 Active</h5>
+            <h2>{{ active_tokens }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h5>⏳ Waiting</h5>
+            <h2>{{ waiting_tokens }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h5>🟢 Serving</h5>
+            <h2>{{ serving_tokens }}</h2>
+        </div>
+    </div>
+
+</div>
+
+<hr class="my-4">
+
+<h4 class="mb-3">🏢 Department Statistics</h4>
+
+<table class="table table-bordered table-hover">
+
+    <thead class="table-primary">
+
+        <tr>
+
+            <th>Department</th>
+            <th>Waiting</th>
+            <th>Serving</th>
+            <th>Completed</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+    {% for dept in department_stats %}
+
+        <tr>
+
+            <td>{{ dept.name }}</td>
+
+            <td>
+                <span class="badge bg-warning text-dark">
+                    {{ dept.waiting }}
+                </span>
+            </td>
+
+            <td>
+                <span class="badge bg-success">
+                    {{ dept.serving }}
+                </span>
+            </td>
+
+            <td>
+                <span class="badge bg-secondary">
+                    {{ dept.completed }}
+                </span>
+            </td>
+
+        </tr>
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+<div class="row mb-4">
+
+    <div class="col-md-6">
+
+        <div class="card p-3">
+
+            <h5 class="text-center">
+                Queue Status
+            </h5>
+
+            <canvas id="statusChart"></canvas>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6">
+
+        <div class="card p-3">
+
+            <h5 class="text-center">
+                Department Distribution
+            </h5>
+
+            <canvas id="departmentChart"></canvas>
+
+        </div>
+
+    </div>
+
+</div>
+
+<h3 class="mt-5 mb-3">
+🚨 Priority Requests
+</h3>
+
+<table class="table table-bordered table-hover">
+
+<thead class="table-danger">
+
+<tr>
+
+<th>Token</th>
+<th>User</th>
+<th>Department</th>
+<th>Priority</th>
+<th>Status</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for queue in pending_requests %}
+
+<tr>
+
+<td>{{ queue.token }}</td>
+
+<td>{{ queue.user.fullname }}</td>
+
+<td>{{ queue.department.name }}</td>
+
+<td>{{ queue.priority }}</td>
+
+<td>
+
+<span class="badge bg-warning">
+Pending
+</span>
+
+</td>
+
+<td>
+
+<a href="{{ url_for('approve_priority', queue_id=queue.id) }}"
+class="btn btn-success btn-sm">
+
+✅ Approve
+
+</a>
+
+<a href="{{ url_for('reject_priority', queue_id=queue.id) }}"
+class="btn btn-danger btn-sm">
+
+❌ Reject
+
+</a>
+
+</td>
+
+</tr>
+
+{% else %}
+
+<tr>
+
+<td colspan="6" class="text-center">
+No Pending Requests
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+<table class="table table-bordered table-hover">
+
+<thead class="table-dark">
+
+<tr>
+
+<th>Token</th>
+<th>User</th>
+<th>Department</th>
+<th>Priority</th>
+<th>Approval</th>
+<th>Status</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for queue in queues %}
+
+<tr>
+
+<td>{{ queue.token }}</td>
+
+<td>{{ queue.user.fullname }}</td>
+
+<td>{{ queue.department.name }}</td>
+
+<td>
+    {{ queue.priority }}
+</td>
+
+<td>
+
+{% if queue.priority_status == "Pending" %}
+
+<span class="badge bg-warning">
+Pending
+</span>
+
+{% else %}
+
+<span class="badge bg-success">
+Approved
+</span>
+
+{% endif %}
+
+</td>
+
+<td>{{ queue.status }}</td>
+
+<td>
+
+{% if queue.status == "Serving" %}
+
+    <a href="{{ url_for('complete_token', queue_id=queue.id) }}"
+       class="btn btn-success btn-sm">
+
+        ✅ Complete
+
+    </a>
+
+{% elif queue.status == "Waiting" %}
+
+    <span class="badge bg-warning text-dark">
+        Waiting
+    </span>
+
+{% else %}
+
+    <span class="badge bg-secondary">
+        Completed
+    </span>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+<footer class="text-center text-secondary mt-5 mb-3">
+    <hr class="border-secondary">
+    <small>
+        © 2026 <strong>QueueFlow AI</strong> | Developed by <strong>Saish Kadam</strong>
+    </small>
+</footer>
+
+<!-- Socket.IO -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+
+<script>
+    const socket = io();
+
+    socket.on("connect", function () {
+        console.log("✅ Connected:", socket.id);
+    });
+
+    socket.on("disconnect", function () {
+        console.log("❌ Disconnected");
+    });
+
+    socket.on("connect_error", function (err) {
+        console.log("❌ Connect Error:", err.message);
+    });
+
+    socket.on("queue_updated", function () {
+        console.log("🔄 Queue Updated");
+        location.reload();
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const statusCtx = document.getElementById('statusChart');
+
+new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Waiting', 'Serving', 'Completed'],
+        datasets: [{
+            data: {{ status_chart | tojson }},  
+            backgroundColor: [
+                '#ffc107',
+                '#198754',
+                '#6c757d'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+const departmentCtx = document.getElementById('departmentChart');
+
+new Chart(departmentCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ department_labels | tojson }},
+        datasets: [{
+            label: 'Total Tokens',
+            data: {{ department_totals | tojson }}
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+
+</body>
+
+</html>

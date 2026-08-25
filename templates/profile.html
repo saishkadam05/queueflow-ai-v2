@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>My Profile</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+
+body{
+    background:#f4f6f9;
+}
+
+.profile-card{
+    max-width:700px;
+    margin:auto;
+    margin-top:50px;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,.15);
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card profile-card">
+
+<div class="card-header bg-primary text-white text-center">
+
+<h2>👤 My Profile</h2>
+
+</div>
+
+<div class="card-body">
+
+<h4 class="mb-4">
+{{ user.fullname }}
+</h4>
+
+<table class="table">
+
+<tr>
+<th>📧 Email</th>
+<td>{{ user.email }}</td>
+</tr>
+
+<tr>
+<th>🎫 Total Tokens</th>
+<td>{{ total_tokens }}</td>
+</tr>
+
+<tr>
+<th>✅ Completed Tokens</th>
+<td>{{ completed_tokens }}</td>
+</tr>
+
+<tr>
+<th>🟢 Active Tokens</th>
+<td>{{ active_tokens }}</td>
+</tr>
+
+<tr>
+<th>📅 Member Since</th>
+<td>{{ user.created_at.strftime("%d %b %Y") }}</td>
+</tr>
+
+</table>
+
+<div class="text-center">
+
+<a href="{{ url_for('dashboard') }}"
+class="btn btn-primary">
+
+🏠 Dashboard
+
+</a>
+
+<a href="{{ url_for('history') }}"
+class="btn btn-secondary">
+
+📜 History
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<footer class="text-center text-secondary mt-5 mb-3">
+    <hr class="border-secondary">
+    <small>
+        © 2026 <strong>QueueFlow AI</strong> | Developed by <strong>Saish Kadam</strong>
+    </small>
+</footer>
+
+</body>
+
+</html>
