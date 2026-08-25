@@ -599,10 +599,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
 
 <script>
-    const socket = io({
-        reconnection: true,
-        reconnectionAttempts: 5
-    });
+    const socket = io({ reconnection: true, reconnectionAttempts: Infinity, reconnectionDelay: 1000, reconnectionDelayMax: 5000, timeout: 20000 });
 
     if ("Notification" in window) {
         Notification.requestPermission();
