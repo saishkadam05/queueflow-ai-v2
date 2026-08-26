@@ -22,6 +22,7 @@ from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
+import threading
 import resend
 
 PRIORITY_ORDER = {
@@ -49,17 +50,21 @@ MAIL_FROM = os.environ.get("MAIL_FROM", "QueueFlow AI <onboarding@resend.dev>")
 
 
 def send_email(to_email, subject, text_body):
-    """Central email helper. Never lets an email failure crash a request —
-    it logs and continues, since email should not block queue operations."""
-    try:
-        resend.Emails.send({
-            "from": MAIL_FROM,
-            "to": [to_email],
-            "subject": subject,
-            "text": text_body
-        })
-    except Exception as e:
-        print(f"[email] failed to send to {to_email}: {e}")
+    """Central email helper. Sends in a background thread so a slow or
+    failing email never blocks the request (join/complete/etc. respond
+    immediately regardless of how long Resend takes)."""
+    def _send():
+        try:
+            resend.Emails.send({
+                "from": MAIL_FROM,
+                "to": [to_email],
+                "subject": subject,
+                "text": text_body
+            })
+        except Exception as e:
+            print(f"[email] failed to send to {to_email}: {e}")
+
+    threading.Thread(target=_send, daemon=True).start()
 
 
 # ------------------------------------------------------------------
