@@ -644,9 +644,31 @@
 
         }
 
-        location.reload();
+        refreshDashboardContent();
 
     });
+
+    // Fetches the current page and swaps in only the dynamic content
+    // section, instead of a full location.reload(). This avoids
+    // re-downloading CSS/JS and reconnecting the socket on every update,
+    // which is what made updates feel like a full slow page refresh.
+    function refreshDashboardContent() {
+        fetch(window.location.href, { cache: "no-store" })
+            .then(function (res) { return res.text(); })
+            .then(function (html) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+                const freshContent = doc.getElementById("dashboard-main-content");
+                const currentContent = document.getElementById("dashboard-main-content");
+                if (freshContent && currentContent) {
+                    currentContent.innerHTML = freshContent.innerHTML;
+                }
+            })
+            .catch(function (err) {
+                console.log("⚠️ Soft refresh failed, falling back to full reload:", err);
+                location.reload();
+            });
+    }
 
     socket.on("your_turn", function(data){
 
